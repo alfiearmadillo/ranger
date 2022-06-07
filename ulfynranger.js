@@ -1,23 +1,33 @@
-var enemypos;
+var nearTarget=0
 var myGamePiece;
+//let dmgNum=[]
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 160, 270);
     myGamePiece.gravity = 0.5;
     myGamePiece.type="player"
+    myGamePiece.class="aoe"
     myGamePiece.range=30
+    myGamePiece.atkRate=100
+    myGamePiece.atkCD=0
     myGamePiece2 = new component(30, 30, "blue", 120, 270);
     myGamePiece2.gravity = 0.5;
     myGamePiece2.type="player"
     myGamePiece2.range=30
+    myGamePiece2.atkRate=100
+    myGamePiece2.atkCD=0
     myGamePiece3 = new component(30, 30, "green", 80, 270);
     myGamePiece3.gravity = 0.5;
     myGamePiece3.type="player"
     myGamePiece3.range=30
+    myGamePiece3.atkRate=100
+    myGamePiece3.atkCD=0
     myGamePiece4 = new component(30, 30, "yellow", 40, 270);
     myGamePiece4.gravity = 0.5;
     myGamePiece4.type="player"
     myGamePiece4.range=30
+    myGamePiece4.atkRate=100
+    myGamePiece4.atkCD=0
     myGameArea.start();
 }
 
@@ -36,7 +46,7 @@ var myGameArea = {
     }
 }
 
-function component(width, height, color, x, y) {
+function component(width, height, color, x, y) {//draw new boxes
     this.width = width;
     this.height = height;
     this.speedX = 0;
@@ -49,8 +59,14 @@ function component(width, height, color, x, y) {
         ctx = myGameArea.context;
         ctx.fillStyle = color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
+        if(this.type==="enemy"){
+            ctx.fillStyle = "red";
+            ctx.fillRect(this.x, this.y-15, 20, 4);
+            ctx.fillStyle = "green";
+            ctx.fillRect(this.x, this.y-15, (this.hp/this.maxhp)*20, 4);
+        }
     }
-    this.newPos = function() {
+    this.newPos = function() {//find new positions
         this.gravitySpeed += this.gravity;
         this.x += this.speedX;
         this.y += this.speedY + this.gravitySpeed;
@@ -58,33 +74,66 @@ function component(width, height, color, x, y) {
         this.hitLeft();
         this.hitRight();
     }
-    this.hitBottom = function() {
+
+//let h=0;
+
+    this.hitBottom = function() {//floor bounce
         var rockbottom = myGameArea.canvas.height - this.height;
         if (this.y > rockbottom) {
             this.y = rockbottom;
             this.gravitySpeed=0
             this.speedX=this.speedX-this.speedX*0.3
             this.speedY=this.speedY-this.speedY*0.3
-            enemypos = closestEnemy(enemy, this.x)
-            if(enemy.length!==0 && this.type==="player" && enemypos.Dist>this.range){
-                if(enemypos.x<this.x){
-                    this.speedX=this.speedX-1
-                    this.speedY=this.speedY-1
+            nearTarget = closestEnemy(enemy, this.x)//logic to do only while on floor
+            if(enemy.length!==0){
+                if (Math.abs(enemy[nearTarget].x - this.x) < this.range&&
+                   (Math.abs(enemy[nearTarget].y - this.y) < this.range)) {
+                if(this.atkCD<=0){
+                    if(this.class="aoe"){
+                        for(m=0;m<enemy.length;m++){
+                            if  (Math.abs(enemy[m].x - this.x) < this.range&&
+                                (Math.abs(enemy[m].y - this.y) < this.range)) {
+                                enemy[m].hp=enemy[m].hp-1
+                            }
+                        }
+                    } else {
+                    enemy[nearTarget].hp=enemy[nearTarget].hp-1
+                    }
+                    // dmgNum[h]=new component(5, 20, "blue", this.x, this.y);
+                    // dmgNum[h].gravity = -0.5;
+                    // dmgNum[h].lifetime = 100;
+                    // h++
+                    this.atkCD=this.atkRate
                 }else{
-                    this.speedX=this.speedX+1
-                    this.speedY=this.speedY-1
+                    this.atkCD=this.atkCD-1
+                }
+
+                if(enemy[nearTarget].hp<=0){//enemy drops to 0 hp
+                    enemy.splice(nearTarget,1)
+                    i=enemy.length
+                }
+            }else{
+            if(enemy.length!==0 && this.type==="player"){//if not in range move towards
+                if(enemy[nearTarget].x<this.x){
+                    this.speedX=this.speedX-Math.random()
+                    this.speedY=this.speedY-Math.random()*2
+                }else{
+                    this.speedX=this.speedX+Math.random()
+                    this.speedY=this.speedY-Math.random()*2
                 }
             }
+        }
+    }
             }
     }
-    this.hitLeft = function() {
+    this.hitLeft = function() {//bounce off left wall
         var rockleft = 0;
         if (this.x < rockleft) {
             this.x = rockleft;
             this.speedX=this.speedX-this.speedX*1.5
             }
     }
-    this.hitRight = function() {
+    this.hitRight = function() {//bounce off right wall
         var rockRight = 930;
         if (this.x > rockRight) {
             this.x = rockRight;
@@ -93,34 +142,29 @@ function component(width, height, color, x, y) {
     }
 }
 
-function closestEnemy(enemy, playerpos){
+function closestEnemy(enemy, playerpos){//finding closesnt enemy to given coordinate
     var closest={
         x : 99999,
         Dist : 99999
     }
+    var indexLoop = 0
     for (let k = 0; k < enemy.length ; k++) {
 
         if(Math.abs(enemy[k].x-playerpos)<closest.Dist){
             closest.Dist=Math.abs(enemy[k].x-playerpos)
             closest.x = enemy[k].x
+            indexLoop=k
         } 
-        if(Math.abs(enemy[k].x+playerpos)<closest.Dist){
-            closest.Dist=Math.abs(enemy[k].x+playerpos)
+        if(Math.abs(playerpos-enemy[k].x)<closest.Dist){
+            closest.Dist=Math.abs(playerpos-enemy[k].x)
             closest.x = enemy[k].x
+            indexLoop=k
         }
-            
-        // if (closest === playerpos) {
-        //     closest = enemy[k].x;
-        // } else if (enemy[k].x > playerpos && enemy[k].x <= Math.abs(closest)) {
-        //     closest = enemy[k].x;
-        // } else if (enemy[k].x < playerpos && - enemy[k].x < Math.abs(closest)) {
-        //     closest = enemy[k].x;
-        // }
     }
-    return closest;
+    return indexLoop;
 }
 
-var move = 0
+var move = 0//updating all entities each frame
 function updateGameArea() {
     myGameArea.clear();
     myGameArea.frameNo += 1;
@@ -132,6 +176,16 @@ function updateGameArea() {
     myGamePiece3.update();
     myGamePiece4.newPos();
     myGamePiece4.update();
+
+    // for(j=0;j<dmgNum.length;j++){
+    // dmgNum[j].lifetime=dmgNum[j].lifetime-1
+    // dmgNum[j].update()
+    // dmgNum[j].newPos()
+    // if(dmgNum[j].lifetime<=0){
+    //     dmgNum.splice(0,1)
+    // }
+    // }
+
     for(j=0;j<enemy.length;j++){
         move = Math.floor(Math.random() * 100);
         if(move===4 ){
@@ -187,7 +241,7 @@ function drag(){
             
             myGamePiece.gravitySpeed = 0
             }
-        }
+        }//dragging p1
         if(block2ToMouseX<30 && block2ToMouseY<30){
             document.onmousemove = function(event) {
                 pointerX = event.pageX-15-(window.innerWidth-960)/2;
@@ -209,7 +263,7 @@ function drag(){
                 
                 myGamePiece2.gravitySpeed = 0
                 }
-        }
+        }//dragging p2
         if(block3ToMouseX<30 && block3ToMouseY<30){
             document.onmousemove = function(event) {
                 pointerX = event.pageX-15-(window.innerWidth-960)/2;
@@ -231,7 +285,7 @@ function drag(){
                 
                 myGamePiece3.gravitySpeed = 0
                 }
-        }
+        }//dragging p3
         if(block4ToMouseX<30 && block4ToMouseY<30){
             document.onmousemove = function(event) {
                 pointerX = event.pageX-15-(window.innerWidth-960)/2;
@@ -253,7 +307,7 @@ function drag(){
                 
                 myGamePiece4.gravitySpeed = 0
                 }
-        } 
+        }//dragging p4
     }
     document.onmouseup = async function(){
         document.onmousemove = function() {
@@ -261,18 +315,24 @@ function drag(){
     }
 }
 
-document.addEventListener('keydown', logKey);
+document.addEventListener('keydown', logKey);//enemy spawning
 let i = 0
 let enemy=[]
 function logKey(e) {
   if(e.code==="KeyA"){
     enemy[i] = new component(20, 20, "purple", 480, 270);
     enemy[i].gravity = 0.5;
+    enemy[i].hp=10
+    enemy[i].maxhp=enemy[i].hp
+    enemy[i].type="enemy"
     i++
   }
   if(e.code==="KeyS"){
     enemy[i] = new component(20, 20, "purple", 680, 270);
     enemy[i].gravity = 0.5;
+    enemy[i].hp=100
+    enemy[i].maxhp=enemy[i].hp
+    enemy[i].type="enemy"
     i++
   }
 }
