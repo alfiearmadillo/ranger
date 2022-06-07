@@ -7,24 +7,31 @@ function startGame() {
     myGamePiece.gravity = 0.5;
     myGamePiece.type="player"
     myGamePiece.class="aoe"
+    myGamePiece.name="Raphael"
     myGamePiece.range=30
     myGamePiece.atkRate=100
     myGamePiece.atkCD=0
     myGamePiece2 = new component(30, 30, "blue", 120, 270);
     myGamePiece2.gravity = 0.5;
     myGamePiece2.type="player"
+    myGamePiece2.class="balls"
+    myGamePiece2.name="Donatello"
     myGamePiece2.range=30
     myGamePiece2.atkRate=100
     myGamePiece2.atkCD=0
     myGamePiece3 = new component(30, 30, "green", 80, 270);
     myGamePiece3.gravity = 0.5;
     myGamePiece3.type="player"
+    myGamePiece3.class="balls"
+    myGamePiece3.name="Michaelangelo"
     myGamePiece3.range=30
     myGamePiece3.atkRate=100
     myGamePiece3.atkCD=0
     myGamePiece4 = new component(30, 30, "yellow", 40, 270);
     myGamePiece4.gravity = 0.5;
     myGamePiece4.type="player"
+    myGamePiece4.class="balls"
+    myGamePiece4.name="Master Splinter"
     myGamePiece4.range=30
     myGamePiece4.atkRate=100
     myGamePiece4.atkCD=0
@@ -89,7 +96,7 @@ function component(width, height, color, x, y) {//draw new boxes
                 if (Math.abs(enemy[nearTarget].x - this.x) < this.range&&
                    (Math.abs(enemy[nearTarget].y - this.y) < this.range)) {
                 if(this.atkCD<=0){
-                    if(this.class="aoe"){
+                    if(this.class==="aoe"){
                         for(m=0;m<enemy.length;m++){
                             if  (Math.abs(enemy[m].x - this.x) < this.range&&
                                 (Math.abs(enemy[m].y - this.y) < this.range)) {
