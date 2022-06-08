@@ -43,15 +43,38 @@ items[3]={name:"Test Bow",damageMin:1,damageMax:2,range:160,atkRate:66,maxSummon
 items[4]={name:"Test Staff",damageMin:0,damageMax:1,range:200,atkRate:200,maxSummons:1,lifeSteal:0,defence:0,type:"Staff"}
 
 function addItem(player, itemID){
+    switch(player){
+        case 0:
+            player=myGamePiece4
+            break;
+        case 1:
+            player=myGamePiece3
+            break;
+        case 2:
+            player=myGamePiece2
+            break;
+        case 3:
+            player=myGamePiece
+            break;
+        default:
+            break;
+    }
     player.item=items[itemID]
 }
 
 let buttonsToMake=8
 let inv = []
+let pIcons = []
 makeButtons(buttonsToMake);
 
 function makeButtons(count){
     for(p=0;p<count;p++){
+        if(p<4){
+            pIcons[p]=document.createElement("div");
+            pIcons[p].classList.add("pIcon")
+            pIcons[p].setAttribute("id", `icon${p}`)
+            document.body.insertBefore(pIcons[p], document.body.firstChild)
+        }
         inv[p] = document.createElement("button");
         inv[p].classList.add('button')
         inv[p].setAttribute("onmousedown", `clickButton(${p})`)
@@ -82,7 +105,7 @@ function makeButtonDark(){
 }
 }
 
-inv[5].storedItem=4
+inv[5].storedItem=4 //inventory stuff area
 let lastslot= -1
 let tmpObj
 
@@ -98,6 +121,9 @@ function clickButton(num){
     inv[lastslot].storedItem=tmpObj
     tmpObj=null
     console.log(inv[num])
+    if(lastslot<4){
+        addItem(lastslot, inv[lastslot].storedItem)
+    }
     lastslot=-1
     for(x=0;x<inv.length;x++){
         document.getElementById(x).style.background='#b4b4b4'
@@ -107,7 +133,9 @@ function clickButton(num){
     lastslot = num
     document.getElementById(lastslot).style.borderColor='#7a7bb7'
     }
-    
+    if(num<4){
+        addItem(num, inv[num].storedItem)
+    }
     document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
 }
 
@@ -174,6 +202,7 @@ function component(width, height, color, x, y) {//draw new boxes
             if(enemy.length!==0){
                 if (Math.abs(enemy[nearTarget].x - this.x) < this.item.range &&
                    (Math.abs(enemy[nearTarget].y - this.y) < this.item.range)) {
+                    
                 if(this.atkCD<=0){
                     // if(this.item.pierce!==0){
                     //     for(m=0;m<this.item.pierce;m++){

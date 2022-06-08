@@ -15,7 +15,7 @@ body {
 }
 
 .button {
-    background-color: #b4b4b4; /* Green */
+    background-color: #b4b4b4;
     border: 5px solid #8a8a8a;
     padding: 20px 20px;
     display: inline-block;
@@ -24,4 +24,41 @@ body {
     left: 30%;
     margin-top: 80%;
     
+}
+
+#icon0{
+    background-color: yellow;
+    padding: 5px 20px;
+    display: inline-block;
+    position: absolute;
+    margin: 2px;
+    left: 30.75%;
+    margin-top: 77.5%;
+}
+#icon1{
+    background-color: green;
+    padding: 5px 20px;
+    display: inline-block;
+    position: absolute;
+    margin: 2px;
+    left: 35.85%;
+    margin-top: 77.5%;
+}
+#icon2{
+    background-color: blue;
+    padding: 5px 20px;
+    display: inline-block;
+    position: absolute;
+    margin: 2px;
+    left: 41.05%;
+    margin-top: 77.5%;
+}
+#icon3{
+    background-color: red;
+    padding: 5px 20px;
+    display: inline-block;
+    position: absolute;
+    margin: 2px;
+    left: 46.3%;
+    margin-top: 77.5%;
 }
