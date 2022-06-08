@@ -11,6 +11,12 @@ var myGamePiece;
 //let dmgNum=[]
 let items=[]
 let droppedItem = []
+let div = document.createElement("div");
+div.setAttribute("id", "container")
+document.body.insertBefore(div, document.body.childNodes[0])
+let divcontainer = document.getElementById("container")
+let emptySlot = -1
+let money = 0
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 160, 270);
@@ -48,7 +54,7 @@ function startGame() {
     myGameArea.start();
 }
 
-items[0]={name:"None",damageMin:1,damageMax:1,range:11,atkRate:100,maxSummons:0,lifeSteal:0,defence:0,type:"None", colour:'#b4b4b4'}
+items[0]={name:"None",damageMin:10,damageMax:10,range:11,atkRate:100,maxSummons:0,lifeSteal:0,defence:0,type:"None", colour:'#b4b4b4'}
 items[1]={name:"Test Sword",damageMin:2,damageMax:4,range:40,atkRate:50,maxSummons:0,lifeSteal:0,defence:0,type:"Sword", colour:'#a83232'}
 items[2]={name:"Test Shield",damageMin:1,damageMax:1,range:20,atkRate:100,maxSummons:0,lifeSteal:0,defence:1,type:"Shield", colour:'#75a832'}
 items[3]={name:"Test Bow",damageMin:1,damageMax:3,range:160,atkRate:66,maxSummons:0,lifeSteal:0,defence:0,type:"Bow", colour:'#634f1c'}
@@ -85,13 +91,13 @@ function makeButtons(count){
             pIcons[p]=document.createElement("div");
             pIcons[p].classList.add("pIcon")
             pIcons[p].setAttribute("id", `icon${p}`)
-            document.body.insertBefore(pIcons[p], document.body.firstChild)
+            divcontainer.insertBefore(pIcons[p], divcontainer.firstChild)
         }
         inv[p] = document.createElement("button");
         inv[p].classList.add('button')
         inv[p].setAttribute("onmousedown", `clickButton(${p})`)
         inv[p].setAttribute("id", `${p}`)
-        document.body.appendChild(inv[p]);
+        divcontainer.appendChild(inv[p]);
     }
 }
 
@@ -208,6 +214,38 @@ function component(width, height, color, x, y) {//draw new boxes
         this.gravitySpeed += this.gravity;
         this.x += this.speedX;
         this.y += this.speedY + this.gravitySpeed;
+
+        if(this.type==="player"){
+            for(b=0;b<droppedItem.length;b++){
+                if(Math.abs(droppedItem[b].x - this.x) < 50 &&
+                (Math.abs(droppedItem[b].y - this.y) < 50)){
+
+                    emptySlot=inv.findIndex(element => element.storedItem===0 && element.invSlot>3)
+
+                    if(droppedItem[b].data.type==="coin"){
+                        money=money+droppedItem[b].data.value
+                        droppedItem.splice(b, 1)
+                    }else if(droppedItem[b].data.type==="health"){
+                        this.hp=this.hp+droppedItem[b].data.value
+                        if(this.hp>this.maxhp){
+                            this.hp=this.maxhp
+                        }
+                        droppedItem.splice(b, 1)
+                    }else if(droppedItem[b].data.type==="item"){
+                        if(emptySlot!==-1){
+                            inv[emptySlot].storedItem=droppedItem[b].data.value
+                            droppedItem.splice(b, 1)
+                            for(e=0;e<inv.length;e++){
+                                document.getElementById(e).style.background=items[inv[e].storedItem].colour
+                            }
+
+
+                        }
+                    }
+                }
+            }
+        }
+
         this.hitBottom();
         this.hitLeft();
         this.hitRight();
@@ -338,14 +376,8 @@ function component(width, height, color, x, y) {//draw new boxes
                         }
 
                     enemy.splice(nearTarget,1)
-                    i=enemy.length
-
-
-                        
+                    i=enemy.length 
                     }
-
-
-
                 }
             }else{
             if(enemy.length!==0){//if not in range move towards
