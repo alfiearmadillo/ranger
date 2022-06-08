@@ -1,41 +1,114 @@
 var nearTarget=0
 var myGamePiece;
 //let dmgNum=[]
+let items=[]
+
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 160, 270);
     myGamePiece.gravity = 0.5;
     myGamePiece.type="player"
-    myGamePiece.class="aoe"
     myGamePiece.name="Raphael"
-    myGamePiece.range=30
-    myGamePiece.atkRate=100
+    myGamePiece.health=100
     myGamePiece.atkCD=0
+    myGamePiece.item=items[1]
     myGamePiece2 = new component(30, 30, "blue", 120, 270);
     myGamePiece2.gravity = 0.5;
     myGamePiece2.type="player"
-    myGamePiece2.class="balls"
     myGamePiece2.name="Donatello"
-    myGamePiece2.range=30
-    myGamePiece2.atkRate=100
+    myGamePiece2.health=100
     myGamePiece2.atkCD=0
+    myGamePiece2.item=items[2]
     myGamePiece3 = new component(30, 30, "green", 80, 270);
     myGamePiece3.gravity = 0.5;
     myGamePiece3.type="player"
-    myGamePiece3.class="balls"
     myGamePiece3.name="Michaelangelo"
-    myGamePiece3.range=30
-    myGamePiece3.atkRate=100
+    myGamePiece3.health=100
     myGamePiece3.atkCD=0
+    myGamePiece3.item=items[3]
     myGamePiece4 = new component(30, 30, "yellow", 40, 270);
     myGamePiece4.gravity = 0.5;
     myGamePiece4.type="player"
-    myGamePiece4.class="balls"
     myGamePiece4.name="Master Splinter"
-    myGamePiece4.range=30
-    myGamePiece4.atkRate=100
+    myGamePiece4.health=100
     myGamePiece4.atkCD=0
+    myGamePiece4.item=items[4]
     myGameArea.start();
+}
+
+items[0]={name:"None",damageMin:0,damageMax:0,range:0,atkRate:0,maxSummons:0,lifeSteal:0,defence:0,type:"None"}
+items[1]={name:"Test Sword",damageMin:1,damageMax:2,range:40,atkRate:50,maxSummons:0,lifeSteal:0,defence:0,type:"Sword"}
+items[2]={name:"Test Shield",damageMin:0,damageMax:1,range:20,atkRate:100,maxSummons:0,lifeSteal:0,defence:1,type:"Shield"}
+items[3]={name:"Test Bow",damageMin:1,damageMax:2,range:160,atkRate:66,maxSummons:0,lifeSteal:0,defence:0,type:"Bow"}
+items[4]={name:"Test Staff",damageMin:0,damageMax:1,range:200,atkRate:200,maxSummons:1,lifeSteal:0,defence:0,type:"Staff"}
+
+function addItem(player, itemID){
+    player.item=items[itemID]
+}
+
+let buttonsToMake=8
+let inv = []
+makeButtons(buttonsToMake);
+
+function makeButtons(count){
+    for(p=0;p<count;p++){
+        inv[p] = document.createElement("button");
+        inv[p].classList.add('button')
+        inv[p].setAttribute("onmousedown", `clickButton(${p})`)
+        inv[p].setAttribute("id", `${p}`)
+        document.body.appendChild(inv[p]);
+    }
+}
+
+for(n=0;n<buttonsToMake;n++){
+    inv[n]={
+        invSlot:n,
+        storedItem:0,
+    }
+}
+
+for(n=0;n<buttonsToMake;n++){
+document.getElementById(n).addEventListener("mouseover", makeButtonLight);
+function makeButtonLight(){
+    if(this.style.background==="rgb(180, 180, 180)" || this.style.background===""){
+    this.style.background='#d2d2d2'
+    }
+}
+document.getElementById(n).addEventListener("mouseout", makeButtonDark);
+function makeButtonDark(){
+    if(this.style.background==="rgb(210, 210, 210)"||this.style.background===""){
+    this.style.background='#b4b4b4'
+    }
+}
+}
+
+inv[5].storedItem=4
+let lastslot= -1
+let tmpObj
+
+if(inv.findIndex(thing => thing.storedItem===4)>-1){
+document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
+}
+
+function clickButton(num){
+    
+    if(lastslot>-1){
+    tmpObj=inv[num].storedItem
+    inv[num].storedItem=inv[lastslot].storedItem
+    inv[lastslot].storedItem=tmpObj
+    tmpObj=null
+    console.log(inv[num])
+    lastslot=-1
+    for(x=0;x<inv.length;x++){
+        document.getElementById(x).style.background='#b4b4b4'
+        document.getElementById(x).style.borderColor='#8a8a8a'
+    } 
+    }else{
+    lastslot = num
+    document.getElementById(lastslot).style.borderColor='#7a7bb7'
+    }
+    
+    document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
 }
 
 var myGameArea = {
@@ -52,6 +125,11 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
+
+function randomDmg(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
 
 function component(width, height, color, x, y) {//draw new boxes
     this.width = width;
@@ -91,26 +169,27 @@ function component(width, height, color, x, y) {//draw new boxes
             this.gravitySpeed=0
             this.speedX=this.speedX-this.speedX*0.3
             this.speedY=this.speedY-this.speedY*0.3
+            if(this.type==="player"){
             nearTarget = closestEnemy(enemy, this.x)//logic to do only while on floor
             if(enemy.length!==0){
-                if (Math.abs(enemy[nearTarget].x - this.x) < this.range&&
-                   (Math.abs(enemy[nearTarget].y - this.y) < this.range)) {
+                if (Math.abs(enemy[nearTarget].x - this.x) < this.item.range &&
+                   (Math.abs(enemy[nearTarget].y - this.y) < this.item.range)) {
                 if(this.atkCD<=0){
-                    if(this.class==="aoe"){
-                        for(m=0;m<enemy.length;m++){
-                            if  (Math.abs(enemy[m].x - this.x) < this.range&&
-                                (Math.abs(enemy[m].y - this.y) < this.range)) {
-                                enemy[m].hp=enemy[m].hp-1
-                            }
-                        }
-                    } else {
-                    enemy[nearTarget].hp=enemy[nearTarget].hp-1
-                    }
+                    // if(this.item.pierce!==0){
+                    //     for(m=0;m<this.item.pierce;m++){
+                    //         if  (Math.abs(enemy[m].x - this.x) < this.range&&
+                    //             (Math.abs(enemy[m].y - this.y) < this.range)) {
+                    //             enemy[m].hp=enemy[m].hp-1
+                    //         }
+                    //     }
+                    // } else {
+                    enemy[nearTarget].hp=enemy[nearTarget].hp-randomDmg(this.item.damageMin, this.item.damageMax)
+                    // }
                     // dmgNum[h]=new component(5, 20, "blue", this.x, this.y);
                     // dmgNum[h].gravity = -0.5;
                     // dmgNum[h].lifetime = 100;
                     // h++
-                    this.atkCD=this.atkRate
+                    this.atkCD=this.item.atkRate
                 }else{
                     this.atkCD=this.atkCD-1
                 }
@@ -120,7 +199,9 @@ function component(width, height, color, x, y) {//draw new boxes
                     i=enemy.length
                 }
             }else{
-            if(enemy.length!==0 && this.type==="player"){//if not in range move towards
+            if(enemy.length!==0){//if not in range move towards
+                if (Math.abs(enemy[nearTarget].x - this.x) < this.item.range+350&&
+                   (Math.abs(enemy[nearTarget].y - this.y) < this.item.range+350)){
                 if(enemy[nearTarget].x<this.x){
                     this.speedX=this.speedX-Math.random()
                     this.speedY=this.speedY-Math.random()*2
@@ -129,8 +210,10 @@ function component(width, height, color, x, y) {//draw new boxes
                     this.speedY=this.speedY-Math.random()*2
                 }
             }
+            }
         }
     }
+}
             }
     }
     this.hitLeft = function() {//bounce off left wall
@@ -322,6 +405,7 @@ function drag(){
     }
 }
 
+
 document.addEventListener('keydown', logKey);//enemy spawning
 let i = 0
 let enemy=[]
@@ -343,3 +427,13 @@ function logKey(e) {
     i++
   }
 }
+
+// document.addEventListener("click", wipeInvActives);
+// function wipeInvActives(){
+//     test = inv.findIndex(element => element.storedItem=2)
+//     document.getElementById(test).style.background='#660033'
+
+// for(x=0;x<inv.length;x++){
+//     inv[x].active=0
+// }
+// }
