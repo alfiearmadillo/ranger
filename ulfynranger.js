@@ -1,46 +1,58 @@
+//constructors for player, enemy, item
+//items with drop chances to enemy, coins, healing, attacks
+//function to roll enemy drops
+//players dying
+//stages
+//heal and revive area
+//shop
+//world map
 var nearTarget=0
 var myGamePiece;
 //let dmgNum=[]
 let items=[]
-
+let droppedItem = []
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 160, 270);
     myGamePiece.gravity = 0.5;
     myGamePiece.type="player"
     myGamePiece.name="Raphael"
-    myGamePiece.health=100
+    myGamePiece.maxhp=100
+    myGamePiece.hp=100
     myGamePiece.atkCD=0
-    myGamePiece.item=items[1]
+    myGamePiece.item=items[0]
     myGamePiece2 = new component(30, 30, "blue", 120, 270);
     myGamePiece2.gravity = 0.5;
     myGamePiece2.type="player"
     myGamePiece2.name="Donatello"
-    myGamePiece2.health=100
+    myGamePiece2.hp=100
+    myGamePiece2.maxhp=100
     myGamePiece2.atkCD=0
-    myGamePiece2.item=items[2]
+    myGamePiece2.item=items[0]
     myGamePiece3 = new component(30, 30, "green", 80, 270);
     myGamePiece3.gravity = 0.5;
     myGamePiece3.type="player"
     myGamePiece3.name="Michaelangelo"
-    myGamePiece3.health=100
+    myGamePiece3.hp=100
+    myGamePiece3.maxhp=100
     myGamePiece3.atkCD=0
-    myGamePiece3.item=items[3]
+    myGamePiece3.item=items[0]
     myGamePiece4 = new component(30, 30, "yellow", 40, 270);
     myGamePiece4.gravity = 0.5;
     myGamePiece4.type="player"
     myGamePiece4.name="Master Splinter"
-    myGamePiece4.health=100
+    myGamePiece4.hp=100
+    myGamePiece4.maxhp=100
     myGamePiece4.atkCD=0
-    myGamePiece4.item=items[4]
+    myGamePiece4.item=items[0]
     myGameArea.start();
 }
 
-items[0]={name:"None",damageMin:0,damageMax:0,range:0,atkRate:0,maxSummons:0,lifeSteal:0,defence:0,type:"None"}
-items[1]={name:"Test Sword",damageMin:1,damageMax:2,range:40,atkRate:50,maxSummons:0,lifeSteal:0,defence:0,type:"Sword"}
-items[2]={name:"Test Shield",damageMin:0,damageMax:1,range:20,atkRate:100,maxSummons:0,lifeSteal:0,defence:1,type:"Shield"}
-items[3]={name:"Test Bow",damageMin:1,damageMax:2,range:160,atkRate:66,maxSummons:0,lifeSteal:0,defence:0,type:"Bow"}
-items[4]={name:"Test Staff",damageMin:0,damageMax:1,range:200,atkRate:200,maxSummons:1,lifeSteal:0,defence:0,type:"Staff"}
+items[0]={name:"None",damageMin:1,damageMax:1,range:11,atkRate:100,maxSummons:0,lifeSteal:0,defence:0,type:"None", colour:'#b4b4b4'}
+items[1]={name:"Test Sword",damageMin:2,damageMax:4,range:40,atkRate:50,maxSummons:0,lifeSteal:0,defence:0,type:"Sword", colour:'#a83232'}
+items[2]={name:"Test Shield",damageMin:1,damageMax:1,range:20,atkRate:100,maxSummons:0,lifeSteal:0,defence:1,type:"Shield", colour:'#75a832'}
+items[3]={name:"Test Bow",damageMin:1,damageMax:3,range:160,atkRate:66,maxSummons:0,lifeSteal:0,defence:0,type:"Bow", colour:'#634f1c'}
+items[4]={name:"Test Staff",damageMin:0,damageMax:1,range:200,atkRate:200,maxSummons:1,lifeSteal:0,defence:0,type:"Staff", colour:'#660033'}
 
 function addItem(player, itemID){
     switch(player){
@@ -62,7 +74,7 @@ function addItem(player, itemID){
     player.item=items[itemID]
 }
 
-let buttonsToMake=8
+let buttonsToMake=12
 let inv = []
 let pIcons = []
 makeButtons(buttonsToMake);
@@ -105,13 +117,18 @@ function makeButtonDark(){
 }
 }
 
-inv[5].storedItem=4 //inventory stuff area
+//inventory stuff area
 let lastslot= -1
 let tmpObj
 
-if(inv.findIndex(thing => thing.storedItem===4)>-1){
-document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
+// if(inv.findIndex(thing => thing.storedItem===4)>-1){ //change this to for, add colour to item
+// document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
+// }
+
+for(e=0;e<inv.length;e++){
+    document.getElementById(e).style.background=items[inv[e].storedItem].colour
 }
+
 
 function clickButton(num){
     
@@ -136,7 +153,9 @@ function clickButton(num){
     if(num<4){
         addItem(num, inv[num].storedItem)
     }
-    document.getElementById(inv.findIndex(thing => thing.storedItem===4)).style.background='#660033'
+    for(e=0;e<inv.length;e++){
+        document.getElementById(e).style.background=items[inv[e].storedItem].colour
+    }
 }
 
 var myGameArea = {
@@ -177,6 +196,12 @@ function component(width, height, color, x, y) {//draw new boxes
             ctx.fillRect(this.x, this.y-15, 20, 4);
             ctx.fillStyle = "green";
             ctx.fillRect(this.x, this.y-15, (this.hp/this.maxhp)*20, 4);
+        }
+        if(this.type==="player"){
+            ctx.fillStyle = "red";
+            ctx.fillRect(this.x, this.y-15, 30, 4);
+            ctx.fillStyle = "green";
+            ctx.fillRect(this.x, this.y-15, (this.hp/this.maxhp)*30, 4);
         }
     }
     this.newPos = function() {//find new positions
@@ -224,8 +249,103 @@ function component(width, height, color, x, y) {//draw new boxes
                 }
 
                 if(enemy[nearTarget].hp<=0){//enemy drops to 0 hp
+                    
+                    if(Object.keys(enemy[nearTarget].drops).length>0){ //enemy dropping items
+
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.coinChance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.coinChance){
+                                console.log("dropped coin")
+                                droppedItem[droppedItem.length] = new component(15, 15, "gold", enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"coin",
+                                    value:enemy[nearTarget].drops.coin
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*6)-3
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.healChance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.healChance){
+                                console.log("dropped hp")
+                                droppedItem[droppedItem.length] = new component(15, 15, "#ff756b", enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"health",
+                                    value:enemy[nearTarget].drops.healPotion
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*3)-1.5
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.itemID1Chance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.itemID1Chance){
+                                console.log("dropped item 1")
+                                droppedItem[droppedItem.length] = new component(15, 15, items[enemy[nearTarget].drops.itemID1].colour, enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"item",
+                                    value:enemy[nearTarget].drops.itemID1
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*6)-3
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.itemID2Chance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.itemID2Chance){
+                                console.log("dropped item 2")
+                                droppedItem[droppedItem.length] = new component(15, 15, items[enemy[nearTarget].drops.itemID2].colour, enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"item",
+                                    value:enemy[nearTarget].drops.itemID2
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*6)-3
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.itemID3Chance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.itemID3Chance){
+                                console.log("dropped item 3")
+                                droppedItem[droppedItem.length] = new component(15, 15, items[enemy[nearTarget].drops.itemID3].colour, enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"item",
+                                    value:enemy[nearTarget].drops.itemID3
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*6)-3
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+                        lootRoll=Math.random()*100
+                        if(enemy[nearTarget].drops.itemID4Chance!==0){
+                            if(lootRoll<enemy[nearTarget].drops.itemID4Chance){
+                                console.log("dropped item 4")
+                                droppedItem[droppedItem.length] = new component(15, 15, items[enemy[nearTarget].drops.itemID4].colour, enemy[nearTarget].x, enemy[nearTarget].y);
+                                droppedItem[droppedItem.length-1].data={
+                                    type:"item",
+                                    value:enemy[nearTarget].drops.itemID4
+                                }
+                                droppedItem[droppedItem.length-1].gravity = 0.5;
+                                droppedItem[droppedItem.length-1].speedX=(Math.random()*6)-3
+                                droppedItem[droppedItem.length-1].speedY=-Math.random()*9
+                            }
+                        }
+
                     enemy.splice(nearTarget,1)
                     i=enemy.length
+
+
+                        
+                    }
+
+
+
                 }
             }else{
             if(enemy.length!==0){//if not in range move towards
@@ -295,7 +415,10 @@ function updateGameArea() {
     myGamePiece3.update();
     myGamePiece4.newPos();
     myGamePiece4.update();
-
+    for(r=0;r<droppedItem.length;r++){
+    droppedItem[r].newPos()
+    droppedItem[r].update()
+    }
     // for(j=0;j<dmgNum.length;j++){
     // dmgNum[j].lifetime=dmgNum[j].lifetime-1
     // dmgNum[j].update()
@@ -445,6 +568,21 @@ function logKey(e) {
     enemy[i].hp=10
     enemy[i].maxhp=enemy[i].hp
     enemy[i].type="enemy"
+    enemy[i].item=items[0]
+    enemy[i].drops={
+        coin:1,
+        coinChance:20,
+        healPotion:10,
+        healChance:10,
+        itemID1:1,
+        itemID1Chance:10,
+        itemID2:2,
+        itemID2Chance:10,
+        itemID3:3,
+        itemID3Chance:10,
+        itemID4:4,
+        itemID4Chance:10
+    }
     i++
   }
   if(e.code==="KeyS"){
@@ -453,6 +591,21 @@ function logKey(e) {
     enemy[i].hp=100
     enemy[i].maxhp=enemy[i].hp
     enemy[i].type="enemy"
+    enemy[i].item=items[0]
+    enemy[i].drops={
+        coin:1,
+        coinChance:20,
+        healPotion:10,
+        healChance:10,
+        itemID1:1,
+        itemID1Chance:10,
+        itemID2:2,
+        itemID2Chance:10,
+        itemID3:3,
+        itemID3Chance:10,
+        itemID4:4,
+        itemID4Chance:10
+    }
     i++
   }
 }
